@@ -1,0 +1,188 @@
+/* General Styles */
+body {
+    background-color: #1a1a1a;
+    color: #f1f1f1;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    margin: auto;
+}
+
+/* Header */
+.header {
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    color: #40b6ff;
+    margin: 0;
+}
+
+/* Scoreboard */
+.scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.scoreboard p {
+    margin: 5px;
+    font-size: 1.2rem;
+}
+
+/* Game Board */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    background-color: #0a0a23;
+    border: 2px solid #40b6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cell:hover {
+    background-color: #40b6ff;
+    color: #0a0a23;
+}
+
+/* Footer */
+.game-footer {
+    margin-top: 20px;
+}
+
+#restart-btn {
+    background-color: #40b6ff;
+    color: #1a1a1a;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#restart-btn:hover {
+    background-color: #1a1a1a;
+    color: #40b6ff;
+    border: 2px solid #40b6ff;
+}
+/*.footer {
+    background-color: #0a0a23;
+    color: #40b6ff;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 1rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);*/
+}
+
+.footer p {
+    margin: 20px 0;
+    color: #666;
+    font-size: 10px;
+    
+}
+/* Style for question mark button */
+#help-btn {
+    background-color: #0a0a23;
+    color: #40b6ff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#help-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Modal styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    background-color: #1a1a1a;
+    color: #f1f1f1;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.close-btn {
+    color: #40b6ff;
+    font-size: 24px;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #f1f1f1;
+}
+.difficulty-selector {
+    margin-bottom: 20px;
+    font-size: 1rem;
+    color: #40b6ff;
+}
+
+.difficulty-selector label {
+    margin-right: 10px;
+}
+
+#difficulty {
+    background-color: #0a0a23;
+    color: #40b6ff;
+    border: 2px solid #40b6ff;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
