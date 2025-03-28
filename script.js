@@ -5,86 +5,198 @@ document.addEventListener("DOMContentLoaded", () => {
     const computerScore = document.getElementById("computer-score");
     const draws = document.getElementById("draws");
     const difficultySelector = document.getElementById("difficulty");
+    const helpBtn = document.getElementById("help-btn");
+    const modal = document.getElementById("help-modal");
+    const closeBtn = document.querySelector(".close-btn");
+    const gameOverModal = document.getElementById("game-over-modal");
+    const gameOverMessage = document.getElementById("game-over-message");
+    const closeGameOverBtn = document.getElementById("close-game-over");
+    const gameMessage = document.getElementById("game-message");
 
     let board = ["", "", "", "", "", "", "", "", ""];
     let currentPlayer = "X";
     let isGameActive = true;
-    let difficulty = "easy"; // Default difficulty
+    let difficulty = "easy";
+
+    const loadScores = () => {
+        playerScore.textContent = localStorage.getItem("playerWins") || 0;
+        computerScore.textContent = localStorage.getItem("computerWins") || 0;
+        draws.textContent = localStorage.getItem("draws") || 0;
+    };
+
+    const saveScores = () => {
+        localStorage.setItem("playerWins", playerScore.textContent);
+        localStorage.setItem("computerWins", computerScore.textContent);
+        localStorage.setItem("draws", draws.textContent);
+    };
+
+    const messages = {
+        start: [
+            "Let's play! You're X.", 
+            "Ready to crush the computer?",
+            "3 in a row wins!",
+            "Watch out for the AI!",
+            "Pro tip: Hard mode is unbeatable!"
+        ],
+        playerTurn: [
+            "Your turn!", 
+            "Make your move!",
+            "Where to next?",
+            "Think carefully...",
+            "Show 'em who's boss!"
+        ],
+        computerTurn: [
+            "Computer is thinking...", 
+            "AI's turn!",
+            "Calculating...",
+            "The machine is plotting...",
+            "Watch out!"
+        ],
+        win: [
+            "You crushed it! 🎉", 
+            "Victory! 🏆",
+            "AI didn't stand a chance!",
+            "Winner winner! 🍗",
+            "Flawless! ✨"
+        ],
+        lose: [
+            "AI outsmarted you... 😅", 
+            "Better luck next time!",
+            "The machines win this round.",
+            "Oof, tough loss.",
+            "AI: 1, You: 0"
+        ],
+        draw: [
+            "It's a tie! 🤝", 
+            "Stalemate!",
+            "No winner this time.",
+            "Equal match!",
+            "Try again!"
+        ]
+    };
+
+    const getRandomMessage = (type) => {
+        return messages[type][Math.floor(Math.random() * messages[type].length)];
+    };
+
+    const updateGameMessage = (type) => {
+        gameMessage.textContent = getRandomMessage(type);
+    };
 
     const winningConditions = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]             
     ];
 
-    // Update difficulty when the selector changes
-    difficultySelector.addEventListener("change", (e) => {
-        difficulty = e.target.value;
-    });
+    const checkWin = (board, player) => {
+        return winningConditions.some(condition => 
+            condition.every(index => board[index] === player)
+        );
+    };
+
+    const findStrategicMove = (player) => {
+        for (const [a, b, c] of winningConditions) {
+            if (board[a] === player && board[b] === player && board[c] === "") return c;
+            if (board[a] === player && board[c] === player && board[b] === "") return b;
+            if (board[b] === player && board[c] === player && board[a] === "") return a;
+        }
+        return null;
+    };
+
+    const minimax = (board, player) => {
+        const availableSpots = board.map((cell, index) => cell === "" ? index : null).filter(val => val !== null);
+
+        if (checkWin(board, "X")) return { score: -10 };
+        if (checkWin(board, "O")) return { score: 10 };
+        if (availableSpots.length === 0) return { score: 0 };
+
+        const moves = [];
+        for (const spot of availableSpots) {
+            const move = { index: spot };
+            board[spot] = player;
+            move.score = minimax(board, player === "O" ? "X" : "O").score;
+            board[spot] = "";
+            moves.push(move);
+        }
+
+        return player === "O" 
+            ? moves.reduce((best, move) => move.score > best.score ? move : best, { score: -Infinity })
+            : moves.reduce((best, move) => move.score < best.score ? move : best, { score: Infinity });
+    };
 
     const computerMove = () => {
-        if (difficulty === "easy") {
-            // Random move for easy difficulty
-            const emptyCells = board.map((value, index) => (value === "" ? index : null)).filter((val) => val !== null);
-            if (emptyCells.length === 0) return undefined;
-            const randomIndex = Math.floor(Math.random() * emptyCells.length);
-            return emptyCells[randomIndex];
-        } else if (difficulty === "hard") {
-            // Prioritize winning or blocking moves for hard difficulty
-            for (let [a, b, c] of winningConditions) {
-                // Check if the computer can win
-                if (board[a] === "O" && board[b] === "O" && board[c] === "") return c;
-                if (board[a] === "O" && board[c] === "O" && board[b] === "") return b;
-                if (board[b] === "O" && board[c] === "O" && board[a] === "") return a;
-
-                // Check if the computer needs to block the player
-                if (board[a] === "X" && board[b] === "X" && board[c] === "") return c;
-                if (board[a] === "X" && board[c] === "X" && board[b] === "") return b;
-                if (board[b] === "X" && board[c] === "X" && board[a] === "") return a;
-            }
-
-            // If no immediate win or block, pick a random move
-            const emptyCells = board.map((value, index) => (value === "" ? index : null)).filter((val) => val !== null);
-            if (emptyCells.length === 0) return undefined;
-            const randomIndex = Math.floor(Math.random() * emptyCells.length);
-            return emptyCells[randomIndex];
+        switch (difficulty) {
+            case "easy":
+                const emptyCells = board.map((cell, index) => cell === "" ? index : null).filter(val => val !== null);
+                return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            
+            case "medium":
+                return findStrategicMove("O") || findStrategicMove("X") || 
+                       Math.random() > 0.3 ? computerMove() : null;
+            
+            case "hard":
+                return minimax(board, "O").index;
         }
     };
 
-    const updateBoard = (index) => {
-        board[index] = currentPlayer;
+    const highlightWinningCells = (winningCombo) => {
+        winningCombo.forEach(index => cells[index].classList.add("win"));
     };
 
-    const checkWinner = () => {
-        let roundWon = false;
-
-        for (let i = 0; i < winningConditions.length; i++) {
-            const [a, b, c] = winningConditions[i];
+    const checkGameStatus = () => {
+        for (const [a, b, c] of winningConditions) {
             if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                roundWon = true;
-                break;
+                highlightWinningCells([a, b, c]);
+                isGameActive = false;
+                
+                if (currentPlayer === "X") {
+                    playerScore.textContent = parseInt(playerScore.textContent) + 1;
+                    updateGameMessage("win");
+                    showGameOver(getRandomMessage("win"));
+                } else {
+                    computerScore.textContent = parseInt(computerScore.textContent) + 1;
+                    updateGameMessage("lose");
+                    showGameOver(getRandomMessage("lose"));
+                }
+                saveScores();
+                return;
             }
         }
 
-        if (roundWon) {
-            if (currentPlayer === "X") {
-                playerScore.textContent = parseInt(playerScore.textContent) + 1;
-            } else {
-                computerScore.textContent = parseInt(computerScore.textContent) + 1;
-            }
+        if (!board.includes("")) {
             isGameActive = false;
-        } else if (!board.includes("")) {
             draws.textContent = parseInt(draws.textContent) + 1;
-            isGameActive = false;
+            updateGameMessage("draw");
+            showGameOver(getRandomMessage("draw"));
+            saveScores();
         }
+    };
 
-        if (!isGameActive) {
-            setTimeout(resetBoard, 2000);
+    const handleCellClick = (e) => {
+        const cell = e.target;
+        const index = cell.getAttribute("data-index");
+
+        if (board[index] === "" && isGameActive) {
+            cell.textContent = currentPlayer;
+            board[index] = currentPlayer;
+            checkGameStatus();
+
+            if (isGameActive) {
+                currentPlayer = "O";
+                updateGameMessage("computerTurn");
+                
+                setTimeout(() => {
+                    const computerIndex = computerMove();
+                    if (computerIndex !== undefined && computerIndex !== null) {
+                        board[computerIndex] = "O";
+                        cells[computerIndex].textContent = "O";
+                        checkGameStatus();
+                    }
+                    currentPlayer = "X";
+                    updateGameMessage("playerTurn");
+                }, 800);
+            }
         }
     };
 
@@ -92,56 +204,36 @@ document.addEventListener("DOMContentLoaded", () => {
         board = ["", "", "", "", "", "", "", "", ""];
         isGameActive = true;
         currentPlayer = "X";
-        cells.forEach((cell) => {
+        cells.forEach(cell => {
             cell.textContent = "";
             cell.classList.remove("win");
         });
+        updateGameMessage("start");
     };
 
-    const handleClick = (e) => {
-        const cell = e.target;
-        const index = cell.getAttribute("data-index");
-
-        if (board[index] === "" && isGameActive) {
-            cell.textContent = currentPlayer;
-            updateBoard(index);
-            checkWinner();
-
-            if (isGameActive) {
-                currentPlayer = "O";
-                const computerIndex = computerMove();
-                if (computerIndex !== undefined) {
-                    board[computerIndex] = "O";
-                    cells[computerIndex].textContent = "O";
-                    checkWinner();
-                }
-                currentPlayer = "X";
-            }
-        }
+    const showGameOver = (message) => {
+        gameOverMessage.textContent = message;
+        gameOverModal.style.display = "block";
     };
 
-    cells.forEach((cell) => {
-        cell.addEventListener("click", handleClick);
-    });
-
+    cells.forEach(cell => cell.addEventListener("click", handleCellClick));
     restartBtn.addEventListener("click", resetBoard);
-
-    // Modal functionality
-    const helpBtn = document.getElementById("help-btn");
-    const modal = document.getElementById("help-modal");
-    const closeBtn = document.querySelector(".close-btn");
-
-    helpBtn.addEventListener("click", () => {
-        modal.style.display = "block";
+    helpBtn.addEventListener("click", () => modal.style.display = "block");
+    closeBtn.addEventListener("click", () => modal.style.display = "none");
+    closeGameOverBtn.addEventListener("click", () => {
+        gameOverModal.style.display = "none";
+        resetBoard();
+    });
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+        if (e.target === gameOverModal) gameOverModal.style.display = "none";
+    });
+    difficultySelector.addEventListener("change", (e) => {
+        difficulty = e.target.value;
+        resetBoard();
     });
 
-    closeBtn.addEventListener("click", () => {
-        modal.style.display = "none";
-    });
-
-    window.addEventListener("click", (event) => {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    });
+    loadScores();
+    updateGameMessage("start");
 });
+                
